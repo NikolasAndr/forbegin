@@ -1,4 +1,4 @@
-# forbegin
+# forbegin linux
 ip a - сетевые интерфейсы
 ifconfig - сетевые настройки (настройка сетевого интерфейса)
 /etc/networks/interface - сетевые настройки адаптеров
