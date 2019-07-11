@@ -1,0 +1,78 @@
+Эластик
+curl -s -X GET -H 'Content-Type: application/json' "172.16.224.78:9200/logstash-mts_internet_communication_policy_live-`date +%Y.%m.%d`/_search?size=0&pretty" -d '{"query":{"bool":{"must":[{"range":{"@timestamp":{"gte":"now-5m"}}}]}},"aggs":{"statusCode_out":{"terms": {"field": "statusCode.keyword"}}}}' | jq '.aggregations.statusCode_out.buckets[] | select(.key=="200").doc_count';
+есть онлайн jq
+
+
+ELASTICSEARCH
+в нашей базе используется формат времени:long. По этому все даты вида: 1557253852291
+клиент:
+серебро
+установка плагина в браузере
+https://chrome.google.com/webstore/detail/elasticsearch-head/ffmkiejjmecolpfloofpjologoblkegm/
+так же можно выполнять с хоста имеющего доступ по http://mts1wps3:9200 
+
+Общий синтаксис использования глобальных команд такой:
+curl 'localhost:9200/_команда/имя?параметр1&параметр2'
+_команда - обычно начинается с подчеркивания и указывает основное действие, которое надо сделать;
+имя - параметр команды, указывает, над чем нужно выполнить действие, или уточняет, что надо делать;
+параметр1 - дополнительные параметры, которые влияют на отображение, форматирование, точность вывода и так далее;
+
+Посмотреть индексы(индексы области данных, как БД в SQL)
+curl 'mts1wps3:9200/_cat/indices?v&pretty'
+ИНФОРМАЦИЯ ОБ ИНДЕКСЕ: _mapping
+curl 'mts1wps3:9200/log-%{day_input}/_mapping?pretty'
+поиск по индексу: _search
+curl -XGET 'http://mts1wps3:9200/индекс/тип/_search?pretty'
+по умолчанию выводит 10 результатов, для большего кол-ва использовать size (size=значение)
+пример
+curl -XGET 'http://mts1wps3:9200/индекс/тип/_search?size=10000&pretty'
+"тип" можно не указывать
+ВИДЫ ПОИСКА:
+term - точное совпадение искомой строки со строкой в индексе или термом;
+match - все слова должны входить в строку, в любом порядке;
+match_phrase - вся фраза должна входить в строку;
+query_string - все слова входят в строку в любом порядке, можно искать по нескольким полям, используя регулярные выражения;
+Синтаксис term такой:
+"query" {
+  "term" {
+    "имя_поля": "что искать"
+  }
+}
+пример: 
+#!/bin/bash
+curl -XGET 'http://mts1wps1:9200/messages_2019_06/_search?size=1&pretty' -H 'Content-Type: application/json' -d '{ "query" : { "term" : { "user_id" : "79150715213" } } }'
+
+ОПЕРАТОРЫ AND И OR ДЛЯ ПОИСКА
+понадобится конструкция bool. Синтаксис её такой:
+
+"query": {
+  "bool" : {
+    "must" : [
+         {"поле1" : "условие"},
+         {"поле2" : "условие"},
+    ],
+    "filter": {},
+    "must_not" : {}
+    "should" : {}
+  }
+}
+must - все условия должны вернуть true;
+must_not - все условия должны вернуть false;
+should - одно из условий должно вернуть true;
+filter - то же самое что и match, но не влияет на оценку релевантности.
+Пример:
+curl -XGET 'http://mts1wps3:9200/messages_2019_02/_search?pretty ' -H 'Content-Type: application/json' -d '
+{
+"query" : {
+"bool" : {
+"must": [
+{"term" : {
+"user_id" : "79179355514"
+}},
+{"match": {
+"date": "1549526118806860142"
+}}
+]
+}
+}
+}'
