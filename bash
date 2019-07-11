@@ -44,3 +44,8 @@ gzip /opt/wps/restin/logs/restAPP_$yesterday.log
 #System logs
 gzip /var/log/*-`date -d yesterday +"%Y%m%d"`
 rm -rf /var/log/*-`date --date="2 days ago" +%Y%m%d`
+
+
+запуск в фоне плюс в вывод в лог
+sudo /opt/webpush/smpp_server/smpp_server /opt/webpush/smpp_server/config.toml >> /opt/webpush/smpp_server/logs/SMPPServer_`date +%Y-%m-%d`.log &
+
